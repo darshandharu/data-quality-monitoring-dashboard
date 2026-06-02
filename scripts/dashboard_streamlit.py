@@ -19,7 +19,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 from sqlalchemy import create_engine
 from datetime import datetime
-from dotenv import load_dotenv
 
 # ── Page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -29,21 +28,14 @@ st.set_page_config(
 )
 
 # ── Configuration ──────────────────────────────────────────────────────────────
-# Credentials are read from a local .env file (see .env.example). Never hardcode
-# secrets — .env is git-ignored so it stays off GitHub.
-load_dotenv()
-DB_USER     = os.getenv("DB_USER", "root")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "")
-DB_HOST     = os.getenv("DB_HOST", "localhost")
-DB_PORT     = int(os.getenv("DB_PORT", "3306"))
-DB_NAME     = os.getenv("DB_NAME", "data_quality")
+# SQLite — zero setup, no server required. DB file lives next to this project.
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+DB_PATH  = os.path.join(BASE_DIR, "data_quality.db")
 
 # ── DB Connection ──────────────────────────────────────────────────────────────
 @st.cache_resource
 def get_engine():
-    return create_engine(
-        f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-    )
+    return create_engine(f"sqlite:///{DB_PATH}")
 
 @st.cache_data(ttl=60)   # refresh every 60 seconds
 def load_data():

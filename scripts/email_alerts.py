@@ -29,26 +29,20 @@ from datetime import datetime, date
 from dotenv import load_dotenv
 
 # ── Configuration ──────────────────────────────────────────────────────────────
-# Credentials are read from a local .env file (see .env.example). Never hardcode
-# secrets — .env is git-ignored so it stays off GitHub.
-load_dotenv()
-DB_USER           = os.getenv("DB_USER", "root")
-DB_PASSWORD       = os.getenv("DB_PASSWORD", "")
-DB_HOST           = os.getenv("DB_HOST", "localhost")
-DB_PORT           = int(os.getenv("DB_PORT", "3306"))
-DB_NAME           = os.getenv("DB_NAME", "data_quality")
+# SQLite — zero setup, no server required. DB file lives next to this project.
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+DB_PATH  = os.path.join(BASE_DIR, "data_quality.db")
 
+# Email settings still loaded from .env (see .env.example)
+load_dotenv()
 SENDER_EMAIL        = os.getenv("SENDER_EMAIL", "")
 SENDER_APP_PASSWORD = os.getenv("SENDER_APP_PASSWORD", "")
 RECEIVER_EMAIL      = os.getenv("RECEIVER_EMAIL", "")
-
-SMTP_HOST         = os.getenv("SMTP_HOST", "smtp.gmail.com")
-SMTP_PORT         = int(os.getenv("SMTP_PORT", "587"))
+SMTP_HOST           = os.getenv("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT           = int(os.getenv("SMTP_PORT", "587"))
 
 # ── Connect & fetch today's issues ────────────────────────────────────────────
-engine = create_engine(
-    f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-)
+engine = create_engine(f"sqlite:///{DB_PATH}")
 
 today = date.today().isoformat()
 query = f"""

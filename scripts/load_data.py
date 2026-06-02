@@ -14,19 +14,12 @@ Usage:
 import os
 import pandas as pd
 from sqlalchemy import create_engine
-from dotenv import load_dotenv
 
 # ── Configuration ──────────────────────────────────────────────────────────────
-# Credentials are read from a local .env file (see .env.example). Never hardcode
-# secrets — .env is git-ignored so it stays off GitHub.
-load_dotenv()
-DB_USER     = os.getenv("DB_USER", "root")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "")
-DB_HOST     = os.getenv("DB_HOST", "localhost")
-DB_PORT     = int(os.getenv("DB_PORT", "3306"))
-DB_NAME     = os.getenv("DB_NAME", "data_quality")
-
-CSV_PATH = os.path.join(os.path.dirname(__file__), "..", "raw_data", "customer_data.csv")
+# SQLite — zero setup, no server required. DB file lives next to this project.
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+DB_PATH  = os.path.join(BASE_DIR, "data_quality.db")
+CSV_PATH = os.path.join(BASE_DIR, "raw_data", "customer_data.csv")
 
 # ── Load CSV ───────────────────────────────────────────────────────────────────
 print("Loading CSV...")
@@ -34,18 +27,15 @@ df = pd.read_csv(CSV_PATH)
 print(f"  Rows read: {len(df)}")
 print(df.head())
 
-# ── Connect to MySQL ───────────────────────────────────────────────────────────
-connection_string = (
-    f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-)
-engine = create_engine(connection_string)
+# ── Connect to SQLite ──────────────────────────────────────────────────────────
+engine = create_engine(f"sqlite:///{DB_PATH}")
 
 # ── Insert into customer_data ──────────────────────────────────────────────────
 df.to_sql(
     name      = "customer_data",
     con       = engine,
-    if_exists = "append",   # append so multiple runs accumulate data
+    if_exists = "replace",   # replace so re-runs start fresh
     index     = False
 )
 
-print("Data loaded successfully into customer_data table.")
+print(f"Data loaded successfully into customer_data table. (DB: {DB_PATH})")

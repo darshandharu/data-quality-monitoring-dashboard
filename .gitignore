@@ -1,3 +1,8 @@
+# ── SQLite database (local runtime file, not source code) ───────────────────
+*.db
+*.sqlite
+*.sqlite3
+
 # ── Secrets / environment ────────────────────────────────────────────────────
 .env
 *.env
