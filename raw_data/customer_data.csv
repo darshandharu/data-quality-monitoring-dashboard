@@ -1,0 +1,6 @@
+customer_id,name,email,age,load_date
+1,John,john@gmail.com,25,2026-05-28
+2,Sarah,,30,2026-05-28
+3,Mike,mike@gmail.com,22,2026-05-28
+3,Mike,mike@gmail.com,22,2026-05-28
+4,David,davidgmail.com,45,2026-05-28
