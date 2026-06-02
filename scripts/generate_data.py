@@ -2,12 +2,14 @@
 generate_data.py
 ----------------
 Generates realistic synthetic customer records with intentional data quality
-issues and loads them into the SQLite database.
+issues, appends them to raw_data/customer_data.csv, then loads the CSV into
+the SQLite database — mirroring how a real daily pipeline works (file drop
+→ ETL → quality checks).
 
 Two modes:
   --mode historical   Generate data across the past N days (default: 60).
-                      Useful for seeding the database so the trend chart
-                      has multi-day history from day one.
+                      Useful for seeding both the CSV and DB so the trend
+                      chart has multi-day history from day one.
 
   --mode daily        Generate a small batch for today only.
                       Run this on a schedule (e.g. GitHub Actions cron) to
@@ -28,8 +30,9 @@ import pandas as pd
 from sqlalchemy import create_engine, text
 
 # ── Config ────────────────────────────────────────────────────────────────────
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-DB_PATH  = os.path.join(BASE_DIR, "data_quality.db")
+BASE_DIR  = os.path.dirname(os.path.dirname(__file__))
+DB_PATH   = os.path.join(BASE_DIR, "data_quality.db")
+CSV_PATH  = os.path.join(BASE_DIR, "raw_data", "customer_data.csv")
 
 # Realistic name pool
 FIRST_NAMES = [
@@ -93,9 +96,18 @@ def generate_batch(date: datetime, n: int, next_id: int) -> pd.DataFrame:
     return pd.DataFrame(result)
 
 
+def append_to_csv(df: pd.DataFrame):
+    """Append new records to raw_data/customer_data.csv (creates if missing)."""
+    write_header = not os.path.exists(CSV_PATH)
+    df.to_csv(CSV_PATH, mode="a", header=write_header, index=False)
+
+
 def load_batch(df: pd.DataFrame, engine, load_date: str):
-    """Append batch to customer_data and run DQ checks, logging issues."""
-    # ── Load records ──────────────────────────────────────────────────────────
+    """Append batch to CSV, load into customer_data, then run DQ checks."""
+    # ── Step 1: Append to CSV (the "raw file drop") ───────────────────────────
+    append_to_csv(df)
+
+    # ── Step 2: Load into DB (the "ETL" step) ─────────────────────────────────
     df.to_sql("customer_data", con=engine, if_exists="append", index=False)
 
     issues = []
