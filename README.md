@@ -1,5 +1,7 @@
 # 📊 Data Quality Monitoring Dashboard
 
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://darshandharu-data-quality-mon-scriptsdashboard-streamlit-vzqtyr.streamlit.app/)
+
 > An end-to-end automated data quality pipeline — built to simulate real-world production workflows in banking, healthcare, and analytics engineering.
 
 ---
