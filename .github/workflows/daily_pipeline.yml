@@ -20,7 +20,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}   # enables git push from Actions
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -44,8 +44,23 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data_quality.db screenshots/issue_breakdown.png \
-                  screenshots/dq_score.png screenshots/dashboard_preview.png \
-                  logs/ || true
-          git diff --cached --quiet || git commit -m "chore: daily pipeline run $(date -u '+%Y-%m-%d')"
-          git push origin main
+
+          echo "=== Files changed ==="
+          git status
+
+          echo "=== Staging files ==="
+          git add data_quality.db
+          git add screenshots/issue_breakdown.png screenshots/dq_score.png \
+                  screenshots/dashboard_preview.png || true
+          git add raw_data/customer_data.csv
+
+          echo "=== Staged diff ==="
+          git diff --cached --stat
+
+          if git diff --cached --quiet; then
+            echo "Nothing to commit — no changes detected"
+          else
+            git commit -m "chore: daily pipeline run $(date -u '+%Y-%m-%d')"
+            git push origin main
+            echo "Committed and pushed successfully"
+          fi
