@@ -44,19 +44,10 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          echo "=== Files changed ==="
-          git status
-
-          echo "=== Staging files ==="
-          git add data_quality.db
-          git add screenshots/issue_breakdown.png screenshots/dq_score.png \
+          git add data_quality.db raw_data/customer_data.csv \
+                  screenshots/issue_breakdown.png \
+                  screenshots/dq_score.png \
                   screenshots/dashboard_preview.png || true
-          git add raw_data/customer_data.csv
-
-          echo "=== Staged diff ==="
-          git diff --cached --stat
-
           if git diff --cached --quiet; then
             echo "Nothing to commit — no changes detected"
           else
